@@ -1,12 +1,11 @@
 import os
 
+from dotenv import load_dotenv
+from py_builder_signing_sdk.config import BuilderApiKeyCreds, BuilderConfig
+
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import ApiCreds, OrderArgs
-from dotenv import load_dotenv
-from py_clob_client.constants import POLYGON
-
 from py_clob_client.order_builder.constants import BUY
-from py_builder_signing_sdk.config import BuilderConfig, BuilderApiKeyCreds
 
 load_dotenv()
 
@@ -14,12 +13,12 @@ load_dotenv()
 def main():
     host = os.getenv("CLOB_API_URL", "https://clob.polymarket.com")
     key = os.getenv("PK")
+    funder = os.getenv("FUNDER")
     creds = ApiCreds(
         api_key=os.getenv("CLOB_API_KEY"),
         api_secret=os.getenv("CLOB_SECRET"),
         api_passphrase=os.getenv("CLOB_PASS_PHRASE"),
     )
-    chain_id = POLYGON
     builder_config = BuilderConfig(
         local_builder_creds=BuilderApiKeyCreds(
             key=os.getenv("BUILDER_API_KEY"),
@@ -28,14 +27,20 @@ def main():
         )
     )
     client = ClobClient(
-        host, key=key, chain_id=chain_id, creds=creds, builder_config=builder_config
+        host,
+        key=key,
+        chain_id=137,
+        creds=creds,
+        funder=funder,
+        signature_type=2,
+        builder_config=builder_config,
     )
 
     order_args = OrderArgs(
-        price=0.06,
-        size=20,
+        price=0.99,
+        size=2,
         side=BUY,
-        token_id="104173557214744537570424345347209544585775842950109756851652855913015295701992",
+        token_id="13327731700723336605330749197217196859843130399253783486932713131362146632673",
     )
     signed_order = client.create_order(order_args)
     resp = client.post_order(signed_order)
